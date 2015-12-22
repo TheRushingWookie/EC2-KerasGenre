@@ -80,7 +80,6 @@ shutdown_data['subject'] = "Early shutdown"
 last_time = time.time()
 def check_for_early_shutdown():
     global last_time
-    import pdb; pdb.set_trace()  # breakpoint 235aca9d //
 
     if time.time() - last_time > 30:
         last_time = time.time()
