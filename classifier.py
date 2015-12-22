@@ -42,7 +42,7 @@ config = init_config()
 debug_mode = os.environ.get('LOCALDEBUG')
 api_key = os.environ['SENDGRID']
 sendgrid_url = "https://api.sendgrid.com/api/mail.send.json"
-#sendgrid_data = """api_user=quinnjarr&api_key=your_sendgrid_password&to=destination@example.com&toname=Destination&subject=Example_Subject&text=testingtextbody&from=info@domain.com"""
+
 startup_data={"to" : "quinnjarr@gmail.com",
               "from" : "quinnjarr@gmail.com",
               "subject" : "Startup",
@@ -325,7 +325,7 @@ def save_graph():
     plot(model, to_file=str(time.time()) + "-" + self_instance_id + '.png')
 
 
-create_model()
+#create_model()
 load_model()
 train()
 #predict()
