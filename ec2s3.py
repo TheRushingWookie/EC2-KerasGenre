@@ -76,7 +76,8 @@ shutdown_data = {"to" : "quinnjarr@gmail.com",
               "html" : "Starting ec2 cats vs dogs",
               }
 shutdown_data['html'] = "Shutting down cats vs dogs"
-shutdown_data['subject'] = "Early shutdown" 
+shutdown_data['subject'] = "Early shutdown"
+last_time = time.time()
 def check_for_early_shutdown():
     if time.time() - last_time > 30:
         last_time = time.time()
