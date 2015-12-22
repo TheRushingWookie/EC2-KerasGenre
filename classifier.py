@@ -57,9 +57,9 @@ batch_size = 32
 nb_epoch = 10
 data_augmentation = True
 # shape of the image (SHAPE x SHAPE)
-shapex, shapey = 128, 128
+shapex, shapey = 32, 32
 # number of convolutional filters to use at each layer
-nb_filters = [128, 128]
+nb_filters = [32, 32]
 # level of pooling to perform at each layer (POOL x POOL)
 nb_pool = (2, 2)
 # level of convolution to perform at each layer (CONV x CONV)
@@ -229,7 +229,6 @@ def train():
     if debug_mode is None:
         save_data()
         shutdown_spot_request()
-import numpy.ma as ma
 def make_mosaic(imgs, nrows, ncols, border=1):
     """
     Given a set of images with all the same shape, makes a
