@@ -4,6 +4,8 @@ import scipy.io.wavfile as wav
 from numpy.lib import stride_tricks
 import scipy
 from utilities import *
+from pydub import AudioSegment
+from scikits.audiolab import *
 """ This work is licensed under a Creative Commons Attribution 3.0 Unported License.
     Frank Zalkow, 2012-2013 """
 
@@ -52,40 +54,60 @@ def logscale_spec(spec, sr=44100, factor=20.):
     return newspec, freqs
 
 """ plot spectrogram"""
-def plotstft(samples, samplerate, outfile, binsize=2**10, plotpath=None, colormap="jet"):
-    s = stft(samples, binsize)
+def plotstft(samples, samplerate, infile, outfolder, binsize=2**10, plotpath=None, colormap="Greys"):
+    s = stft(samples, 256)
     
     sshow, freq = logscale_spec(s, factor=1.0, sr=samplerate)
     ims = 20.*np.log10(np.abs(sshow)/10e-6) # amplitude to decibel
     #return ims
     timebins, freqbins = np.shape(ims)
-    #scipy.misc.toimage(imnp.transpose(ims)s, cmin=0.0, cmax=...).save('outfile.jpg')
-    #scipy.misc.imsave('outfile.jpg', np.transpose(ims))
-    plt.figure(figsize=(15, 7.5))
+    #scipy.misc.toimage(imnp.transpose(ims)s, cmin=0.0, cmax=...).save('infile.jpg')
+    #scipy.misc.imsave('infile.jpg', np.transpose(ims))
     
-    #plt.colorbar()
-    slash = outfile.rfind('/')
-    create_path(outfile[:slash] + "/imgs/" + outfile[slash + 1:-4])
-    plt.imsave(outfile[:slash] + "/imgs/" + outfile[slash + 1:-4], np.transpose(ims))
-    plt.close()
-    return ims
+    
+    slash = infile.rfind('/')
+    outpath = outfolder + infile[slash + 1:-4] + ".png"
+    create_path(outpath)
+    #plt.imshow(np.transpose(ims), origin="lower", aspect="auto", cmap=colormap, interpolation="none")
+    #plt.imsave(infile[:slash] + "/imgs/" + infile[slash + 1:-4], np.transpose(ims), cmap="Greys")
+    #plt.close()
+    #return ims
     #plt.xlabel("time (s)")
     #plt.ylabel("frequency (hz)")
-    import pdb; pdb.set_trace()  # breakpoint 155ee20a //
 
     #plt.xlim([0, timebins-1])
     #plt.ylim([0, freqbins])
+    fig = plt.figure(figsize=(10, 5 ))
+    ax=fig.add_subplot(1,1,1)
+    plt.axis('off')
+    plt.imshow(np.transpose(ims), origin="lower", aspect="auto", cmap=colormap, interpolation="none")
+    #plt.close()
+    #plt.colorbar()
 
+    #plt.xlabel("time (s)")
+    #plt.ylabel("frequency (hz)")
+    plt.xlim([0, timebins-1])
+    plt.ylim([0, freqbins/2.5])
+    extent = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
     xlocs = np.float32(np.linspace(0, timebins-1, 5))
     #plt.xticks(xlocs, ["%.02f" % l for l in ((xlocs*len(samples)/timebins)+(0.5*binsize))/samplerate])
     ylocs = np.int16(np.round(np.linspace(0, freqbins-1, 10)))
     #plt.yticks(ylocs, ["%.02f" % freq[i] for i in ylocs])
-    plt.savefig("/Users/quinnjarrell/Desktop/Projects/GenreClassifier/test", bbox_inches="tight")
-    if plotpath:
-        plt.savefig(plotpath, bbox_inches="tight")
-    else:
-        plt.show()
-        
-    plt.clf()
+    xlocs = np.float32(np.linspace(0, timebins-1, 5))
+    #plt.xticks(xlocs, ["%.02f" % l for l in ((xlocs*len(samples)/timebins)+(0.5*binsize))/samplerate])
+    ylocs = np.int16(np.round(np.linspace(0, freqbins-1, 10)))
+    #plt.yticks(ylocs, ["%.02f" % freq[i] for i in ylocs])
+    #print infile
+    #plt.show()
 
-#plotstft("my_audio_file.wav")
+    plt.savefig(outpath, frameon=False, bbox_inches=extent, pad_inches=0, format="png")
+    plt.close(fig)
+    
+    plt.clf()
+#song = AudioSegment.from_mp3("/Users/quinnjarrell/datasets/Music/segmented/Users/quinnjarrell/datasets/Music/alternative/50_Minutes-Colours1.mp3")
+#sound_file = Sndfile("/Users/quinnjarrell/datasets/Music/segmented/Users/quinnjarrell/datasets/Music/alternative/50_Minutes-Colours0.wav", 'r')
+#signal = sound_file.read_frames(sound_file.nframes)
+#plotstft(signal[:,], 22050, "outs3.jpg")
+
+
+

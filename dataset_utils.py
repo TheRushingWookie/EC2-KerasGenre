@@ -41,12 +41,17 @@ def load_files(config):
     for folder in os.walk(data_path):
         if folder[0] == data_path:
             continue
+
         category = folder[0][folder[0].rfind('/') + 1:]
+        if category == "imgs":
+            continue
         for file_name in folder[2]:
+
             if file_name == '.DS_Store':
                 continue
             #print folder[0], file_name
-            data[folder[0] +'/' + file_name] = config['cat_to_id'][category]
+            print category
+            data[folder[0] +'/' + file_name] = int(category)
     return data
 
 def gen_test_train(config):

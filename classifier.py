@@ -12,7 +12,7 @@ from keras.datasets import mnist
 from six.moves import range
 from os import listdir
 from os.path import isfile, join
-
+from scikits.audiolab import *
 
 from dataset_utils import *
 from ec2s3 import store_to_s3, get_from_s3, get_bucket_items, shutdown_spot_request, check_for_early_shutdown, self_instance_id
@@ -23,7 +23,7 @@ import requests
 import theano
 import os
 from pydub import AudioSegment
-#from spectrogram import plotstft
+from spectrogram import plotstft
 from multi import parmap
 '''
     Train a (fairly simple) deep CNN on the CIFAR10 small images dataset.
@@ -67,6 +67,12 @@ nb_conv = (3, 3)
 # the CIFAR10 images are RGB
 image_dimensions = 3
 
+def prep_spectrograms():
+    for song,category in config['data'].items():
+        sound_file = Sndfile(song, 'r')
+        signal = sound_file.read_frames(sound_file.nframes)
+
+        plotstft(signal[:,], 44100, song, config['data_path'] + "imgs/" + str(category) + "/")
 
 
 
@@ -77,7 +83,8 @@ def load_data():
     #for song, category in config['data'].items():
     #    segment_song(song, add_paths(config['data_path'], 'segmented'))
     #song = AudioSegment.from_mp3("test1.mp3")
-    #plotstft( song.get_array_of_samples(),  song.frame_rate)
+
+    #prep_spectrograms()
 
     x_train_imgs, x_test_imgs, y_train, y_test = gen_test_train(config)
     print("loading mp3s")
@@ -224,7 +231,7 @@ def train():
     # (std, mean, and principal components if ZCA whitening is applied)
     #checkpointer = ModelCheckpoint(filepath="/Users/quinnjarrell/Desktop/Experiments/keras/saved/", verbose=1, save_best_only=True)
     history = LossHistory()
-    model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=100000, show_accuracy=True, verbose=1, validation_data=(X_test, Y_test),callbacks=[history])
+    model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=100, show_accuracy=True, verbose=1, validation_data=(X_test, Y_test),callbacks=[history])
     score = model.evaluate(X_test, Y_test, show_accuracy=True, verbose=0)
     if debug_mode is None:
         save_data()
@@ -270,29 +277,29 @@ def predict():
     import matplotlib.pyplot as plt
     import matplotlib.cm as cm
     np.set_printoptions(precision=5, suppress=True)
-    convout1_f = theano.function([model.get_input(train=False)], convout1.get_output(train=False))
-    predictions = model.predict(X_valid[:10]).tolist()
-    print("Tests ", zip(predictions, y_valid[:10].tolist()))
+    #convout1_f = theano.function([model.get_input(train=False)], convout1.get_output(train=False))
+    predictions = model.predict(X_test[:10]).tolist()
+    print("Tests ", zip(predictions, X_test[:10].tolist()))
     import pdb; pdb.set_trace()  # breakpoint 8d9fb711 //
 
-    Y_pred = model.predict(X_valid)
+    Y_pred = model.predict(X_test)
     # Convert one-hot to index
     y_pred = np.argmax(Y_pred, axis=1)
     from sklearn.metrics import classification_report
-    print(classification_report(y_valid, y_pred))
+    print(classification_report(y_test , y_pred))
     # Visualize convolution result (after activation)
     i = 100
     # Visualize the first layer of convolutions on an input image
-    X = X_valid[i:i+1]
+    X = X_test[i:i+1]
     print("I predict a ", model.predict(X))
     
     plt.figure()
     plt.title('input')
 
     nice_imshow(plt.gca(), array_to_img(np.squeeze(X)), vmin=0, vmax=1, cmap=cm.binary)
-    C1 = convout1_f(X)
-    C1 = np.squeeze(C1)
-    print("C1 shape : ", C1.shape)
+    #C1 = convout1_f(X)
+    #C1 = np.squeeze(C1)
+    #print("C1 shape : ", C1.shape)
 
     plt.figure(figsize=(shapex, shapey))
     plt.suptitle('convout1')
@@ -324,9 +331,10 @@ def save_graph():
     plot(model, to_file=str(time.time()) + "-" + self_instance_id + '.png')
 
 
-#create_model()
-load_model()
-train()
+
+create_model()
+#load_model()
+#train()
 #predict()
 #predict_image("/Users/quinnjarrell/Downloads/catbread.jpg", 'cat')
 #save_graph()
