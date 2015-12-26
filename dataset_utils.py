@@ -6,6 +6,7 @@ import glob
 import os
 from PIL import Image
 import numpy as np
+from scikits.audiolab import *
 from keras.preprocessing.image import img_to_array,array_to_img
 debug = os.environ.get('LOCALDEBUG')
 
@@ -24,6 +25,13 @@ def init_config():
     config['s3_bucket'] = os.environ.get("BUCKET")
     config['data'] = None
     return config
+
+def prep_spectrograms():
+    for song,category in config['data'].items():
+        sound_file = Sndfile(song, 'r')
+        signal = sound_file.read_frames(sound_file.nframes)
+
+        plotstft(signal[:,], 44100, song, config['data_path'] + "imgs/" + str(category) + "/")
 
 def convert_song_to_img(x_train, x_test):
     #BROKEN FOR NOW

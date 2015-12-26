@@ -12,7 +12,7 @@ from keras.datasets import mnist
 from six.moves import range
 from os import listdir
 from os.path import isfile, join
-from scikits.audiolab import *
+
 
 from dataset_utils import *
 from ec2s3 import store_to_s3, get_from_s3, get_bucket_items, shutdown_spot_request, check_for_early_shutdown, self_instance_id
@@ -22,7 +22,6 @@ import StringIO
 import requests
 import theano
 import os
-from pydub import AudioSegment
 from spectrogram import plotstft
 from multi import parmap
 '''
@@ -66,13 +65,6 @@ nb_pool = (2, 2)
 nb_conv = (3, 3)
 # the CIFAR10 images are RGB
 image_dimensions = 3
-
-def prep_spectrograms():
-    for song,category in config['data'].items():
-        sound_file = Sndfile(song, 'r')
-        signal = sound_file.read_frames(sound_file.nframes)
-
-        plotstft(signal[:,], 44100, song, config['data_path'] + "imgs/" + str(category) + "/")
 
 
 
