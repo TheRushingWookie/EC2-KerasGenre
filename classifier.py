@@ -53,7 +53,7 @@ if debug_mode is None:
 max_num_data = 300000
 temp_file_name = "/tmp/genres.hdf5"
 batch_size = 32
-nb_epoch = 10
+nb_epoch = 20
 data_augmentation = True
 # shape of the image (SHAPE x SHAPE)
 shapex, shapey = 32, 32
@@ -223,7 +223,7 @@ def train():
     # (std, mean, and principal components if ZCA whitening is applied)
     #checkpointer = ModelCheckpoint(filepath="/Users/quinnjarrell/Desktop/Experiments/keras/saved/", verbose=1, save_best_only=True)
     history = LossHistory()
-    model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=100, show_accuracy=True, verbose=1, validation_data=(X_test, Y_test),callbacks=[history])
+    model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=nb_epoch, show_accuracy=True, verbose=1, validation_data=(X_test, Y_test),callbacks=[history])
     score = model.evaluate(X_test, Y_test, show_accuracy=True, verbose=0)
     if debug_mode is None:
         save_data()
@@ -324,9 +324,9 @@ def save_graph():
 
 
 
-create_model()
-#load_model()
-#train()
+#create_model()
+load_model()
+train()
 #predict()
 #predict_image("/Users/quinnjarrell/Downloads/catbread.jpg", 'cat')
 #save_graph()
