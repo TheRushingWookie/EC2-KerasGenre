@@ -26,12 +26,12 @@ def init_config():
     config['data'] = None
     return config
 
-def prep_spectrograms():
-    for song,category in config['data'].items():
+def prep_spectrograms(items_hash, outpath):
+    for song,category in items_hash:
         sound_file = Sndfile(song, 'r')
         signal = sound_file.read_frames(sound_file.nframes)
 
-        plotstft(signal[:,], 44100, song, config['data_path'] + "imgs/" + str(category) + "/")
+        plotstft(signal[:,], 44100, song, outpath + "imgs/" + str(category) + "/")
 
 def convert_song_to_img(x_train, x_test):
     #BROKEN FOR NOW
@@ -79,8 +79,4 @@ def segment_song(file_name, export_path):
     song = AudioSegment.from_mp3(file_name)
     #Pydub length is in milliseconds. Songs are 10 secs long to divide into 3 and lose last milliseconds
     segments = chunks(3333, song)[:-1]
-
-    for idx, segment in enumerate(segments):
-        path = export_path + file_name
-        create_path(path)
-        segment.export(append_file_name(path, str(idx)))
+    return segments

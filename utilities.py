@@ -87,7 +87,11 @@ def append_file_name(file_name, append):
     ext_ind = file_name.rfind('.')
     return file_name[:ext_ind] + append + file_name[ext_ind:]
 
+def max_hash(hash):
+    return max(hash, key=hash.get)
 
+def mode(list):
+    return max_hash(create_frequency_hash(list))
 
 
 

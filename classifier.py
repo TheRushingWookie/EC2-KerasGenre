@@ -12,7 +12,7 @@ from keras.datasets import mnist
 from six.moves import range
 from os import listdir
 from os.path import isfile, join
-
+from pydub import AudioSegment
 
 from dataset_utils import *
 from ec2s3 import store_to_s3, get_from_s3, get_bucket_items, shutdown_spot_request, check_for_early_shutdown, self_instance_id
@@ -53,7 +53,7 @@ if debug_mode is None:
 max_num_data = 300000
 temp_file_name = "/tmp/genres.hdf5"
 batch_size = 32
-nb_epoch = 20
+nb_epoch = 50
 data_augmentation = True
 # shape of the image (SHAPE x SHAPE)
 shapex, shapey = 32, 32
@@ -72,8 +72,14 @@ def load_data():
 
     
     config['data'] = load_files(config)
-    #for song, category in config['data'].items():
-    #    segment_song(song, add_paths(config['data_path'], 'segmented'))
+    """for song, category in config['data'].items():
+        export_path = add_paths(config['data_path'], 'segmented')
+        segments = segment_song(song, export_path)
+        for idx, segment in enumerate(segments):
+            path = export_path + song
+            create_path(path)
+            segment.export(append_file_name(path, str(idx)),format="wav")"""
+     
     #song = AudioSegment.from_mp3("test1.mp3")
 
     #prep_spectrograms()
@@ -297,25 +303,26 @@ def predict():
     plt.suptitle('convout1')
     #nice_imshow(plt.gca(), make_mosaic(C1, 6, 6), cmap=cm.binary)
 
-def predict_image(image_path, img_type):
+def predict_image(song_path, song_type):
+    num_pred_segments = 5
+    data = segment_song()
+    #print(hash(tuple(data.tolist()[0][0])))
+    type_id = config.catgory_to_id[song_type]
+    X_pred = np.zeros((num_pred_segments, 3, 32, 32), dtype="uint8")
+    for i in range(num_pred_segments):
+        X_pred[i] = data[i]
+    prep_spectrograms()
 
-    for i in range(1):
-        data = load_image(image_path, need_augments=True)
-
-        print(hash(tuple(data.tolist()[0][0])))
-        type_id = type_name_to_type_id[img_type]
-        X_pred = np.zeros((1, 3, 32, 32), dtype="uint8")
-        X_pred[0] = data
-        X_pred = X_pred.astype("float32")
-        X_pred /= 255
-        prediction = model.predict(X_pred)
-        pred_max = np.argmax(prediction[0])
-        pred_name = config['categories'][pred_max]
-        pred_conf = prediction[0][pred_max]
+    X_pred = X_pred.astype("float32")
+    X_pred /= 255
+    prediction = model.predict(X_pred)
+    pred_max = mode(map(prediction, np.argmax))
+    pred_name = config['categories'][pred_max]
+    pred_conf = prediction[0][pred_max]
 
 
-        print(prediction)
-        print("Guessing %s is a %s with confidence %s. Guess is %s" % (image_path, pred_name, pred_conf, pred_name == img_type))
+    print(prediction)
+    print("Guessing %s is a %s with confidence %s. Guess is %s" % (song_path, pred_name, pred_conf, pred_name == song_type))
 
 
 def save_graph():
