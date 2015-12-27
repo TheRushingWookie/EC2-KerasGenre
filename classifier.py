@@ -163,7 +163,7 @@ class LossHistory(keras.callbacks.Callback):
             self.i += 1
             print(self.i)
             self.best_lost = loss
-            if self.i % 2 == 0:
+            if True:
                 print("Saving data")
                 save_data()
                 save_email_data = startup_data
